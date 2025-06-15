@@ -7,10 +7,10 @@ export class Controller extends GameObject {
     this.object = object;
     this.keys = {};
 
-    window.addEventListener("keydown", (e) => {
+    document.addEventListener("keydown", (e) => {
       this.keys[e.key] = true;
     });
-    window.addEventListener("keyup", (e) => {
+    document.addEventListener("keyup", (e) => {
       this.keys[e.key] = false;
     });
   }
