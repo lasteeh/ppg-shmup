@@ -17,13 +17,24 @@ export class Player extends GameObject {
     this.addChild(controller);
   }
 
-  step(delta) {
+  step(delta, root) {
     this.elapsedTime += delta;
 
     if (this.elapsedTime > this.animationInterval) {
       this.color = this.color === "blue" ? "darkblue" : "blue";
       this.elapsedTime = 0;
     }
+
+    // prevent player from going off screen
+    const bounds = root.bounds;
+    this.position.x = Math.max(
+      0,
+      Math.min(this.position.x, bounds.width - this.frameSize)
+    );
+    this.position.y = Math.max(
+      0,
+      Math.min(this.position.y, bounds.height - this.frameSize)
+    );
   }
 
   drawImage(ctx, x, y) {
