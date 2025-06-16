@@ -1,6 +1,7 @@
 import { Button } from "./Button.js";
 import { GameLoop } from "./GameLoop.js";
 import { Input } from "./Input.js";
+import { Label } from "./Label.js";
 import { Player } from "./Player.js";
 import { Scene } from "./Scene.js";
 import { Vector2 } from "./Vector2.js";
@@ -38,13 +39,11 @@ export class Game {
     const hostButton = new Button({
       text: "Host Game",
       position: new Vector2(20, 20),
-      context: this.ctx,
       onClick: (e) => this.switchScene("lobby"),
     });
     const joinButton = new Button({
       text: "Join Game",
       position: new Vector2(20, 50),
-      context: this.ctx,
       onClick: (e) => console.log("clicked"),
     });
 
@@ -67,6 +66,12 @@ export class Game {
       bounds: this.gameBounds,
       input: this.input,
     });
+    const roomCode = new Label({
+      text: "Room Code: ",
+      position: new Vector2(20, 20),
+    });
+
+    lobbyScene.addChild(roomCode);
 
     this.scenes["lobby"] = lobbyScene;
 

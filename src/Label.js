@@ -1,11 +1,9 @@
 import { GameObject } from "./GameObject.js";
 import { Vector2 } from "./Vector2.js";
 
-export class Button extends GameObject {
-  constructor({ text, width = null, height = null, position, onClick }) {
+export class Label extends GameObject {
+  constructor({ text, width = null, height = null, position }) {
     super({ position });
-
-    this.onClick = onClick;
 
     this.text = text;
     this.fontSize = 14;
@@ -17,26 +15,7 @@ export class Button extends GameObject {
   }
 
   step(delta, root) {
-    const { input } = root;
-
-    if (this.isHovered(input)) {
-      this.backgroundColor = "lightgray";
-      if (input?.wasClicked()) {
-        this.onClick();
-        input?.resetClick();
-      }
-    } else {
-      this.backgroundColor = "white";
-    }
-  }
-
-  isHovered(input) {
-    return (
-      input?.mouse.x >= this.position.x &&
-      input?.mouse.x <= this.position.x + this.width &&
-      input?.mouse.y >= this.position.y &&
-      input?.mouse.y <= this.position.y + this.height
-    );
+    //
   }
 
   drawImage(ctx, x, y) {
