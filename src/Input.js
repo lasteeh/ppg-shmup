@@ -30,6 +30,7 @@ export class Input {
     });
 
     canvas.addEventListener("mouseup", (e) => {
+      this.mouse.wasClicked = false;
       this.mouse.isDown = false;
     });
   }

@@ -31,18 +31,19 @@ export class Game {
 
   init() {
     // initiate main menu scene
-    const mainMenuScene = new Scene({ bounds: this.gameBounds });
+    const mainMenuScene = new Scene({
+      bounds: this.gameBounds,
+      input: this.input,
+    });
     const hostButton = new Button({
       text: "Host Game",
       position: new Vector2(20, 20),
-      input: this.input,
       context: this.ctx,
-      onClick: (e) => this.connectSocket(),
+      onClick: (e) => this.switchScene("lobby"),
     });
     const joinButton = new Button({
       text: "Join Game",
       position: new Vector2(20, 50),
-      input: this.input,
       context: this.ctx,
       onClick: (e) => console.log("clicked"),
     });
@@ -54,13 +55,20 @@ export class Game {
     this.scenes["mainMenu"] = mainMenuScene;
 
     // initiate gameplay scene
-    const gameScene = new Scene({ bounds: this.gameBounds });
-    const player = new Player({ input: this.input });
+    const gameScene = new Scene({ bounds: this.gameBounds, input: this.input });
+    const player = new Player({});
 
     // add elements to gamescene
     gameScene.addChild(player);
 
     this.scenes["game"] = gameScene;
+
+    const lobbyScene = new Scene({
+      bounds: this.gameBounds,
+      input: this.input,
+    });
+
+    this.scenes["lobby"] = lobbyScene;
 
     this.switchScene("mainMenu");
   }

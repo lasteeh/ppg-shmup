@@ -1,10 +1,8 @@
 import { GameObject } from "./GameObject.js";
 
 export class Player extends GameObject {
-  constructor({ position, input }) {
+  constructor({ position }) {
     super({ position });
-
-    this.input = input;
 
     this.frameSize = 16;
     this.speed = 6;
@@ -23,7 +21,7 @@ export class Player extends GameObject {
       this.elapsedTime = 0;
     }
 
-    this.move(delta);
+    this.move(delta, root);
 
     // prevent player from going off screen
     const bounds = root.bounds;
@@ -37,14 +35,16 @@ export class Player extends GameObject {
     );
   }
 
-  move(delta) {
+  move(delta, root) {
+    const { input } = root;
+
     let dx = 0;
     let dy = 0;
 
-    if (this.input?.keys["ArrowUp"] || this.input?.keys["w"]) dy -= 1;
-    if (this.input?.keys["ArrowDown"] || this.input?.keys["s"]) dy += 1;
-    if (this.input?.keys["ArrowLeft"] || this.input?.keys["a"]) dx -= 1;
-    if (this.input?.keys["ArrowRight"] || this.input?.keys["d"]) dx += 1;
+    if (input?.keys["ArrowUp"] || input?.keys["w"]) dy -= 1;
+    if (input?.keys["ArrowDown"] || input?.keys["s"]) dy += 1;
+    if (input?.keys["ArrowLeft"] || input?.keys["a"]) dx -= 1;
+    if (input?.keys["ArrowRight"] || input?.keys["d"]) dx += 1;
 
     if (dx !== 0 || dy !== 0) {
       const length = Math.sqrt(dx * dx + dy * dy);

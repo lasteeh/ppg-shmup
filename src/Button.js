@@ -7,13 +7,11 @@ export class Button extends GameObject {
     width = null,
     height = null,
     position,
-    input,
     onClick,
     context,
   }) {
     super({ position });
 
-    this.input = input;
     this.onClick = onClick;
 
     this.text = text;
@@ -36,23 +34,25 @@ export class Button extends GameObject {
   }
 
   step(delta, root) {
-    if (this.isHovered()) {
+    const { input } = root;
+
+    if (this.isHovered(input)) {
       this.backgroundColor = "lightgray";
-      if (this.input?.wasClicked()) {
+      if (input?.wasClicked()) {
         this.onClick();
-        this.input?.resetClick();
+        input?.resetClick();
       }
     } else {
       this.backgroundColor = "white";
     }
   }
 
-  isHovered() {
+  isHovered(input) {
     return (
-      this.input?.mouse.x >= this.position.x &&
-      this.input?.mouse.x <= this.position.x + this.width &&
-      this.input?.mouse.y >= this.position.y &&
-      this.input?.mouse.y <= this.position.y + this.height
+      input?.mouse.x >= this.position.x &&
+      input?.mouse.x <= this.position.x + this.width &&
+      input?.mouse.y >= this.position.y &&
+      input?.mouse.y <= this.position.y + this.height
     );
   }
 
