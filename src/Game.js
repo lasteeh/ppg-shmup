@@ -23,6 +23,7 @@ export class Game {
     this.gameBounds = { width: this.gameWidth, height: this.gameHeight };
     this.input = new Input(this.canvas, dpr);
 
+    this.scenes = {};
     this.activeScene = null;
   }
 
@@ -44,8 +45,11 @@ export class Game {
       onClick: (e) => console.log("clicked"),
     });
 
+    // add elements to main menu scene
     mainMenuScene.addChild(hostButton);
     mainMenuScene.addChild(joinButton);
+
+    this.scenes["mainMenu"] = mainMenuScene;
 
     // initiate gameplay scene
     const gameScene = new Scene({ bounds: this.gameBounds });
@@ -54,8 +58,14 @@ export class Game {
     // add elements to gamescene
     gameScene.addChild(player);
 
-    // this.activeScene = gameScene;
-    this.activeScene = mainMenuScene;
+    this.scenes["game"] = gameScene;
+
+    this.activeScene = this.scenes["mainMenu"];
+  }
+
+  switchScene(name) {
+    if (!this.scenes[name]) throw new Error("Scene not found.");
+    this.activeScene = this.scenes[name];
   }
 
   update = (delta) => {

@@ -2,15 +2,21 @@ import { GameObject } from "./GameObject.js";
 import { Vector2 } from "./Vector2.js";
 
 export class Button extends GameObject {
-  constructor({ text, position, input, onClick, context }) {
+  constructor({
+    text,
+    width = null,
+    height = null,
+    position,
+    input,
+    onClick,
+    context,
+  }) {
     super({ position });
 
     this.input = input;
     this.onClick = onClick;
 
     this.text = text;
-    this.width = null;
-    this.height = null;
     this.fontSize = 14;
     this.backgroundColor = "white";
     this.textColor = "black";
@@ -20,17 +26,24 @@ export class Button extends GameObject {
     this.textWidth = context.measureText(this.text).width;
     this.textHeight = this.fontSize;
 
-    if (this.width === null) this.width = this.textWidth + this.padding.x * 2;
-    if (this.height === null)
-      this.height = this.textHeight + this.padding.y * 2;
+    const calculatedWidth = this.textWidth + this.padding.x * 2;
+    const calculatedHeight = this.textHeight + this.padding.y * 2;
+
+    this.width =
+      width !== null ? Math.max(width, calculatedWidth) : calculatedWidth;
+    this.height =
+      height !== null ? Math.max(height, calculatedHeight) : calculatedHeight;
   }
 
   step(delta, root) {
     if (this.isHovered()) {
+      this.backgroundColor = "lightgray";
       if (this.input?.wasClicked()) {
         this.onClick();
         this.input?.resetClick();
       }
+    } else {
+      this.backgroundColor = "white";
     }
   }
 
