@@ -78,12 +78,12 @@ export class Game {
     this.switchScene("mainMenu");
   }
 
-  switchScene(name) {
+  switchScene = (name) => {
     if (!this.scenes[name]) throw new Error("Scene not found.");
     this.activeScene = this.scenes[name];
-  }
+  };
 
-  connectSocket() {
+  connectSocket = () => {
     if (this.socket && this.socket.readyState === WebSocket.OPEN)
       return this.socket;
 
@@ -103,7 +103,7 @@ export class Game {
     };
 
     return this.socket;
-  }
+  };
 
   update = (delta) => {
     this.activeScene.stepEntry(delta, this.activeScene);
