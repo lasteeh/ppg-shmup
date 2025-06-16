@@ -1,5 +1,8 @@
 export class Input {
-  constructor(canvas, scale) {
+  constructor(canvas, dpr) {
+    this.dpr = dpr;
+    this.canvas = canvas;
+
     this.keys = {};
     this.mouse = {
       x: 0,
@@ -16,9 +19,9 @@ export class Input {
     });
 
     canvas.addEventListener("mousemove", (e) => {
-      const rect = canvas.getBoundingClientRect();
-      this.mouse.x = (e.clientX - rect.left) / scale;
-      this.mouse.y = (e.clientY - rect.top) / scale;
+      const pos = this.getPos(e);
+      this.mouse.x = pos.x;
+      this.mouse.y = pos.y;
     });
 
     canvas.addEventListener("mousedown", (e) => {
@@ -28,7 +31,6 @@ export class Input {
 
     canvas.addEventListener("mouseup", (e) => {
       this.mouse.isDown = false;
-      this.mouse.wasClicked = false;
     });
   }
 
@@ -43,4 +45,16 @@ export class Input {
   resetClick() {
     this.mouse.wasClicked = false;
   }
+
+  getPos = (e) => {
+    const rect = this.canvas.getBoundingClientRect();
+    // rect.width/height are CSS pixels; canvas.width/height are backing‐store pixels
+    // multiplying by dpr maps CSS→backing‑store, then dividing by dpr gives logical coords
+    const scaleX = this.canvas.width / rect.width;
+    const scaleY = this.canvas.height / rect.height;
+    return {
+      x: ((e.clientX - rect.left) * scaleX) / this.dpr,
+      y: ((e.clientY - rect.top) * scaleY) / this.dpr,
+    };
+  };
 }

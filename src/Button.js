@@ -17,8 +17,7 @@ export class Button extends GameObject {
     this.padding = new Vector2(4, 4);
 
     context.font = `${this.fontSize}px sans-serif`;
-    this.textMetrics = context.measureText(this.text);
-    this.textWidth = this.textMetrics.width;
+    this.textWidth = context.measureText(this.text).width;
     this.textHeight = this.fontSize;
 
     if (this.width === null) this.width = this.textWidth + this.padding.x * 2;

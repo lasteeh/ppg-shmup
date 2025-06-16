@@ -7,7 +7,7 @@ export class Player extends GameObject {
     this.input = input;
 
     this.frameSize = 16;
-    this.speed = 2;
+    this.speed = 6;
     this.color = "blue";
 
     // animations
