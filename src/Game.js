@@ -25,6 +25,8 @@ export class Game {
 
     this.scenes = {};
     this.activeScene = null;
+
+    this.socket = null;
   }
 
   init() {
@@ -35,7 +37,7 @@ export class Game {
       position: new Vector2(20, 20),
       input: this.input,
       context: this.ctx,
-      onClick: (e) => console.log("clicked"),
+      onClick: (e) => this.connectSocket(),
     });
     const joinButton = new Button({
       text: "Join Game",
@@ -66,6 +68,28 @@ export class Game {
   switchScene(name) {
     if (!this.scenes[name]) throw new Error("Scene not found.");
     this.activeScene = this.scenes[name];
+  }
+
+  connectSocket() {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN)
+      return this.socket;
+
+    this.socket = new WebSocket("ws://localhost:7979/ws");
+
+    this.socket.onopen = () => {
+      console.log("Connected to websocket server.");
+    };
+
+    this.socket.onerror = (e) => {
+      console.log("Websocket error: ", e);
+    };
+
+    this.socket.onclose = () => {
+      console.log("Websocket closed.");
+      this.socket = null;
+    };
+
+    return this.socket;
   }
 
   update = (delta) => {
