@@ -60,7 +60,7 @@ export class Game {
 
     this.scenes["game"] = gameScene;
 
-    this.activeScene = this.scenes["mainMenu"];
+    this.switchScene("mainMenu");
   }
 
   switchScene(name) {
