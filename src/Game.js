@@ -28,23 +28,68 @@ export class Game {
     this.activeScene = null;
 
     this.socket = null;
+    this.isLoading = false;
   }
 
   init() {
     // initiate main menu scene
-    const mainMenuScene = new Scene({
-      bounds: this.gameBounds,
-      input: this.input,
-    });
+    const mainMenuScene = new Scene({ bounds: this.gameBounds });
+    mainMenuScene.attach("input", this.input);
     const hostButton = new Button({
       text: "Host Game",
+      width: 120,
       position: new Vector2(20, 20),
-      onClick: (e) => this.switchScene("lobby"),
+      onClick: async () => {
+        if (this.isLoading) return;
+
+        this.load(true);
+        hostButton.setProperty("text", "Creating a lobby...");
+
+        try {
+          const socket = await this.connectSocket();
+
+          if (socket && socket.readyState == WebSocket.OPEN) {
+            const lobbyScene = this.scenes["lobby"];
+            lobbyScene.attach(socket);
+
+            this.load(false);
+            this.switchScene("lobby");
+          }
+        } catch (err) {
+          hostButton.setProperty("text", "Host Game");
+          alert("Failed to connect to websocket server. Try again later.");
+        } finally {
+          this.load(false);
+        }
+      },
     });
     const joinButton = new Button({
       text: "Join Game",
+      width: 120,
       position: new Vector2(20, 50),
-      onClick: (e) => console.log("clicked"),
+      onClick: async () => {
+        if (this.isLoading) return;
+
+        this.load(true);
+        joinButton.setProperty("text", "Joining a lobby...");
+
+        try {
+          const socket = await this.connectSocket();
+
+          if (socket && socket.readyState == WebSocket.OPEN) {
+            const lobbyScene = this.scenes["lobby"];
+            lobbyScene.attach(socket);
+
+            this.load(false);
+            this.switchScene("lobby");
+          }
+        } catch (err) {
+          joinButton.setProperty("text", "Join Game");
+          alert("Failed to connect to websocket server. Try again later.");
+        } finally {
+          this.load(false);
+        }
+      },
     });
 
     // add elements to main menu scene
@@ -54,7 +99,8 @@ export class Game {
     this.scenes["mainMenu"] = mainMenuScene;
 
     // initiate gameplay scene
-    const gameScene = new Scene({ bounds: this.gameBounds, input: this.input });
+    const gameScene = new Scene({ bounds: this.gameBounds });
+    gameScene.attach("input", this.input);
     const player = new Player({});
 
     // add elements to gamescene
@@ -62,16 +108,23 @@ export class Game {
 
     this.scenes["game"] = gameScene;
 
-    const lobbyScene = new Scene({
-      bounds: this.gameBounds,
-      input: this.input,
-    });
+    const lobbyScene = new Scene({ bounds: this.gameBounds });
+    lobbyScene.attach("input", this.input);
     const roomCode = new Label({
       text: "Room Code: ",
       position: new Vector2(20, 20),
     });
+    const goBackButton = new Button({
+      text: "Go Back",
+      position: new Vector2(20, this.gameHeight - 40),
+      onClick: () => {
+        this.socket.close();
+        this.switchScene("mainMenu");
+      },
+    });
 
     lobbyScene.addChild(roomCode);
+    lobbyScene.addChild(goBackButton);
 
     this.scenes["lobby"] = lobbyScene;
 
@@ -84,25 +137,34 @@ export class Game {
   };
 
   connectSocket = () => {
-    if (this.socket && this.socket.readyState === WebSocket.OPEN)
-      return this.socket;
+    return new Promise((resolve, reject) => {
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        resolve(this.socket);
+        return;
+      }
 
-    this.socket = new WebSocket("ws://localhost:7979/ws");
+      this.socket = new WebSocket("ws://localhost:7979/ws");
 
-    this.socket.onopen = () => {
-      console.log("Connected to websocket server.");
-    };
+      this.socket.onopen = () => {
+        console.log("Connected to websocket server.");
+        resolve(this.socket);
+      };
 
-    this.socket.onerror = (e) => {
-      console.log("Websocket error: ", e);
-    };
+      this.socket.onerror = (e) => {
+        console.log("Websocket error: ", e);
+        reject(new Error("Failed to connect to websocket server."));
+      };
 
-    this.socket.onclose = () => {
-      console.log("Websocket closed.");
-      this.socket = null;
-    };
+      this.socket.onclose = () => {
+        console.log("Websocket closed.");
+        this.socket = null;
+      };
+    });
+  };
 
-    return this.socket;
+  load = (bool) => {
+    this.isLoading = bool;
+    document.body.setAttribute("data-loading", bool);
   };
 
   update = (delta) => {

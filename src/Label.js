@@ -2,16 +2,31 @@ import { GameObject } from "./GameObject.js";
 import { Vector2 } from "./Vector2.js";
 
 export class Label extends GameObject {
-  constructor({ text, width = null, height = null, position }) {
+  constructor({
+    text,
+    width = null,
+    height = null,
+    fontSize = 14,
+    backgroundColor = "transparent",
+    textColor = "black",
+    position,
+  }) {
     super({ position });
 
     this.text = text;
-    this.fontSize = 14;
-    this.backgroundColor = "white";
-    this.textColor = "black";
+    this.fontSize = fontSize;
+    this.backgroundColor = backgroundColor;
+    this.textColor = textColor;
     this.width = width;
     this.height = height;
     this.padding = new Vector2(4, 4);
+  }
+
+  setProperty(property, value) {
+    if (!this.hasOwnProperty(property))
+      throw new Error("Property not found: " + property);
+
+    this[property] = value;
   }
 
   step(delta, root) {

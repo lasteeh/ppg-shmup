@@ -1,10 +1,13 @@
 import { GameObject } from "./GameObject.js";
 
 export class Scene extends GameObject {
-  constructor({ bounds, input }) {
+  constructor({ bounds }) {
     super({});
 
     this.bounds = bounds;
-    this.input = input;
+  }
+
+  attach(name, object) {
+    this[name] = object;
   }
 }
