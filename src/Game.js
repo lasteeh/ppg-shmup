@@ -29,6 +29,8 @@ export class Game {
 
     this.socket = null;
     this.isLoading = false;
+
+    this.roomCode = null;
   }
 
   init() {
@@ -147,6 +149,7 @@ export class Game {
 
       this.socket.onopen = () => {
         console.log("Connected to websocket server.");
+        this.socket.addEventListener("message", this.handleSocketMessage);
         resolve(this.socket);
       };
 
@@ -157,9 +160,26 @@ export class Game {
 
       this.socket.onclose = () => {
         console.log("Websocket closed.");
+        this.socket.removeEventListener("message", this.handleSocketMessage);
         this.socket = null;
       };
     });
+  };
+
+  handleSocketMessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+
+      switch (data.type) {
+        case "room-created":
+          // check if code received
+          break;
+        default:
+          console.warn("Unhandled message type: ", data.type);
+      }
+    } catch (err) {
+      console.error("Failed to handle message: ", err);
+    }
   };
 
   load = (bool) => {
