@@ -5,12 +5,15 @@ export class GameObject {
     this.position = position ?? new Vector2(0, 0);
     this.children = [];
     this.parent = null;
+
+    this._dirty = true; // flag for recompute
   }
 
   setProperty(property, value) {
     if (!this.hasOwnProperty(property))
       throw new Error("Property not found: " + property);
 
+    this._dirty = true;
     this[property] = value;
   }
 

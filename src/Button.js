@@ -1,28 +1,16 @@
-import { GameObject } from "./GameObject.js";
+import { UIElement } from "./UIElement.js";
 import { Vector2 } from "./Vector2.js";
 
-export class Button extends GameObject {
+export class Button extends UIElement {
   constructor({
-    text,
-    width = null,
-    height = null,
-    fontSize = 14,
-    backgroundColor = "white",
-    textColor = "black",
-    position,
+    padding = new Vector2(4, 4),
+    textAlign = "center",
     onClick,
+    ...options
   }) {
-    super({ position });
+    super({ padding, textAlign, ...options });
 
     this.onClick = onClick;
-
-    this.text = text;
-    this.fontSize = fontSize;
-    this.backgroundColor = backgroundColor;
-    this.textColor = textColor;
-    this.width = width;
-    this.height = height;
-    this.padding = new Vector2(4, 4);
   }
 
   step(delta, root) {
@@ -31,6 +19,7 @@ export class Button extends GameObject {
     if (this.isHovered(input)) {
       this.backgroundColor = "lightgray";
       if (input?.wasClicked()) {
+        if (!this.onClick) return;
         this.onClick();
         input?.resetClick();
       }
@@ -40,43 +29,14 @@ export class Button extends GameObject {
   }
 
   isHovered(input) {
+    const globalX = (this.parent?.position?.x ?? 0) + this.position.x;
+    const globalY = (this.parent?.position?.y ?? 0) + this.position.y;
+
     return (
-      input?.mouse.x >= this.position.x &&
-      input?.mouse.x <= this.position.x + this.width &&
-      input?.mouse.y >= this.position.y &&
-      input?.mouse.y <= this.position.y + this.height
+      input?.mouse.x >= globalX &&
+      input?.mouse.x <= globalX + this.drawWidth &&
+      input?.mouse.y >= globalY &&
+      input?.mouse.y <= globalY + this.drawHeight
     );
-  }
-
-  drawImage(ctx, x, y) {
-    let drawX = Math.round(x);
-    let drawY = Math.round(y);
-
-    ctx.font = `${this.fontSize}px sans-serif`;
-    this.textWidth = ctx.measureText(this.text).width;
-    this.textHeight = this.fontSize;
-
-    const calculatedWidth = this.textWidth + this.padding.x * 2;
-    const calculatedHeight = this.textHeight + this.padding.y * 2;
-
-    this.width =
-      this.width !== null
-        ? Math.max(this.width, calculatedWidth)
-        : calculatedWidth;
-    this.height =
-      this.height !== null
-        ? Math.max(this.height, calculatedHeight)
-        : calculatedHeight;
-
-    const textX = drawX + (this.width - this.textWidth) / 2;
-    const textY = drawY + (this.height + this.fontSize / 2) / 2;
-
-    // draw backround
-    ctx.fillStyle = this.backgroundColor;
-    ctx.fillRect(drawX, drawY, this.width, this.height);
-
-    // draw text
-    ctx.fillStyle = this.textColor;
-    ctx.fillText(this.text, Math.round(textX), Math.round(textY));
   }
 }

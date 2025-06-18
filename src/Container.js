@@ -1,16 +1,7 @@
-import { GameObject } from "./GameObject.js";
+import { UIElement } from "./UIElement.js";
 
-export class Container extends GameObject {
-  constructor({
-    position,
-    width = null,
-    height = null,
-    backgroundColor = "white",
-  }) {
-    super({ position });
-
-    this.width = width;
-    this.height = height;
-    this.backgroundColor = backgroundColor;
+export class Container extends UIElement {
+  constructor({ ...option }) {
+    super({ ...option });
   }
 }
