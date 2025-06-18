@@ -15,6 +15,10 @@ export class Game {
 
     this.canvas.width = virtualWidth * dpr;
     this.canvas.height = virtualHeight * dpr;
+
+    this.aspectRatio = virtualWidth / virtualHeight;
+    this.canvas.style.aspectRatio = this.aspectRatio;
+
     this.ctx = canvas.getContext("2d");
     this.ctx.scale(dpr, dpr);
 
@@ -35,7 +39,7 @@ export class Game {
 
   init() {
     // initiate main menu scene
-    const mainMenuScene = new Scene({ bounds: this.gameBounds });
+    const mainMenuScene = new Scene();
     mainMenuScene.attach("input", this.input);
     const hostButton = new Button({
       text: "Host Game",
@@ -101,7 +105,8 @@ export class Game {
     this.scenes["mainMenu"] = mainMenuScene;
 
     // initiate gameplay scene
-    const gameScene = new Scene({ bounds: this.gameBounds });
+    const gameScene = new Scene();
+    gameScene.attach("bounds", this.gameBounds);
     gameScene.attach("input", this.input);
     const player = new Player({});
 
@@ -110,7 +115,7 @@ export class Game {
 
     this.scenes["game"] = gameScene;
 
-    const lobbyScene = new Scene({ bounds: this.gameBounds });
+    const lobbyScene = new Scene();
     lobbyScene.attach("input", this.input);
     const roomCode = new Label({
       text: "Room Code: ",

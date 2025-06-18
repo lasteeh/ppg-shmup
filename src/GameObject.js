@@ -14,6 +14,13 @@ export class GameObject {
     this[property] = value;
   }
 
+  attach(name, object) {
+    if (this[name] !== undefined)
+      throw new Error("Object already attached: " + name);
+
+    this[name] = object;
+  }
+
   stepEntry(delta, root) {
     this.children.forEach((child) => {
       child.stepEntry(delta, root);
