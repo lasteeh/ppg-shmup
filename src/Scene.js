@@ -8,6 +8,9 @@ export class Scene extends GameObject {
   }
 
   attach(name, object) {
+    if (this[name] !== undefined)
+      throw new Error("Object already attached to scene: " + name);
+
     this[name] = object;
   }
 }

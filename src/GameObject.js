@@ -7,6 +7,13 @@ export class GameObject {
     this.parent = null;
   }
 
+  setProperty(property, value) {
+    if (!this.hasOwnProperty(property))
+      throw new Error("Property not found: " + property);
+
+    this[property] = value;
+  }
+
   stepEntry(delta, root) {
     this.children.forEach((child) => {
       child.stepEntry(delta, root);

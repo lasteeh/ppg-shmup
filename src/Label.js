@@ -22,13 +22,6 @@ export class Label extends GameObject {
     this.padding = new Vector2(4, 4);
   }
 
-  setProperty(property, value) {
-    if (!this.hasOwnProperty(property))
-      throw new Error("Property not found: " + property);
-
-    this[property] = value;
-  }
-
   step(delta, root) {
     //
   }
