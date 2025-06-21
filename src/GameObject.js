@@ -1,8 +1,10 @@
 import { Vector2 } from "./Vector2.js";
 
 export class GameObject {
-  constructor({ position }) {
+  constructor({ position, zIndex = 0 }) {
     this.position = position ?? new Vector2(0, 0);
+    this.zIndex = zIndex;
+
     this.children = [];
     this.parent = null;
 
@@ -25,10 +27,12 @@ export class GameObject {
   }
 
   stepEntry(delta, root) {
-    this.children.forEach((child) => {
-      child.stepEntry(delta, root);
-    });
-
+    this.children
+      .slice()
+      .sort((a, b) => (b.zIndex ?? 0) - (a.zIndex ?? 0))
+      .forEach((child) => {
+        child.stepEntry(delta, root);
+      });
     this.step(delta, root);
   }
 
@@ -42,9 +46,10 @@ export class GameObject {
 
     this.drawImage(ctx, drawPosX, drawPosY);
 
-    this.children.forEach((child) => {
-      child.draw(ctx, drawPosX, drawPosY);
-    });
+    this.children
+      .slice()
+      .sort((a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0))
+      .forEach((child) => child.draw(ctx, drawPosX, drawPosY));
   }
 
   drawImage(ctx, x, y) {

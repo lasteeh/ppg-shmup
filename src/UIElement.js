@@ -4,6 +4,7 @@ import { Vector2 } from "./Vector2.js";
 export class UIElement extends GameObject {
   constructor({
     position,
+    zIndex,
     text = "",
     textColor = "black",
     textAlign = "left", // "center", "left", "right"
@@ -15,7 +16,7 @@ export class UIElement extends GameObject {
     height = null,
     padding = new Vector2(0, 0),
   }) {
-    super({ position });
+    super({ position, zIndex });
 
     this.drawWidth = 0;
     this.drawHeight = 0;
@@ -114,9 +115,10 @@ export class UIElement extends GameObject {
 
     this.drawImage(ctx, drawPosX, drawPosY);
 
-    this.children.forEach((child) => {
-      child.draw(ctx, drawPosX, drawPosY);
-    });
+    this.children
+      .slice()
+      .sort((a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0))
+      .forEach((child) => child.draw(ctx, drawPosX, drawPosY));
   }
 
   drawImage(ctx, x, y) {
