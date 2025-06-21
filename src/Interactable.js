@@ -1,7 +1,7 @@
 import { GameObject } from "./GameObject.js";
 import { Vector2 } from "./Vector2.js";
 
-export class UIElement extends GameObject {
+export class Interactable extends GameObject {
   constructor({
     position,
     zIndex,

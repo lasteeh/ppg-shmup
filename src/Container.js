@@ -1,5 +1,5 @@
-import { UIElement } from "./UIElement.js";
-export class Container extends UIElement {
+import { Interactable } from "./Interactable.js";
+export class Container extends Interactable {
   constructor({
     flexDirection = "row", // "row" or "column"
     gap = 0, // px between children

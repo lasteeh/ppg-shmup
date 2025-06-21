@@ -1,7 +1,7 @@
-import { UIElement } from "./UIElement.js";
+import { Interactable } from "./Interactable.js";
 import { Vector2 } from "./Vector2.js";
 
-export class Button extends UIElement {
+export class Button extends Interactable {
   constructor({
     padding = new Vector2(4, 4),
     textAlign = "center",
