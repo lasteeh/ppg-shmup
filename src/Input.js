@@ -26,11 +26,10 @@ export class Input {
 
     canvas.addEventListener("mousedown", (e) => {
       this.mouse.isDown = true;
-      this.mouse.wasClicked = true;
     });
 
     canvas.addEventListener("mouseup", (e) => {
-      this.mouse.wasClicked = false;
+      this.mouse.wasClicked = true;
       this.mouse.isDown = false;
     });
   }
