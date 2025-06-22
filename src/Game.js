@@ -230,7 +230,7 @@ export class Game {
 
   load = (bool) => {
     this.isLoading = bool;
-    document.body.setAttribute("data-loading", bool);
+    document.documentElement.setAttribute("data-loading", bool);
   };
 
   update = (delta) => {

@@ -9,6 +9,8 @@ export class Input {
       y: 0,
       isDown: false,
       wasClicked: false,
+      clickX: null,
+      clickY: null,
     };
 
     window.addEventListener("keydown", (e) => {
@@ -29,6 +31,10 @@ export class Input {
     });
 
     canvas.addEventListener("mouseup", (e) => {
+      const pos = this.getPos(e);
+      this.mouse.clickX = pos.x;
+      this.mouse.clickY = pos.y;
+
       this.mouse.wasClicked = true;
       this.mouse.isDown = false;
     });
@@ -44,6 +50,8 @@ export class Input {
 
   resetClick() {
     this.mouse.wasClicked = false;
+    this.mouse.clickX = null;
+    this.mouse.clickY = null;
   }
 
   getPos = (e) => {

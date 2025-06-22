@@ -15,9 +15,14 @@ export class Scene extends GameObject {
 
     const interactiveObjects = this.collectInterfaces() ?? [];
 
+    const wasClicked = this.input?.wasClicked();
+    const clickX = input?.mouse.clickX;
+    const clickY = input?.mouse.clickY;
+
     for (const obj of interactiveObjects) {
       const wasHovering = obj.isHovering ?? false;
       const isHovering = obj.containsPoint(mouseX, mouseY);
+      const isTarget = obj.containsPoint(clickX, clickY);
 
       if (wasHovering !== isHovering) {
         obj._dirty = true;
@@ -32,7 +37,7 @@ export class Scene extends GameObject {
 
         obj.onHover?.(delta, root);
 
-        if (this.input?.wasClicked()) {
+        if (wasClicked && isTarget) {
           obj.onClick?.(delta, root);
           input?.resetClick();
         }
