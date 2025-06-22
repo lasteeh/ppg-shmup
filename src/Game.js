@@ -7,6 +7,7 @@ import { Player } from "./components/Player.js";
 import { Scene } from "./components/Scene.js";
 import { Vector2 } from "./Vector2.js";
 import { Dialog } from "./components/containers/Dialog.js";
+import { TextInput } from "./components/TextInput.js";
 
 export class Game {
   constructor(canvas, virtualWidth, virtualHeight) {
@@ -90,9 +91,9 @@ export class Game {
       flexDirection: "column",
       gap: 10,
     });
-    const roomCodeInput = new Label({
+    const roomCodeInput = new TextInput({
       backgroundColor: "lightgray",
-      text: "Enter Room Code",
+      placeholder: "Enter Room Code",
       fontSize: 24,
       padding: new Vector2(6, 6),
     });
@@ -111,28 +112,42 @@ export class Game {
         if (this.isLoading) return;
 
         this.load(true);
-        joinButton.setProperty("text", "Joining a lobby...");
+        submitJoinButton.setProperty("text", "Joining lobby...");
+
+        // console.log("submitting: ", roomCodeInput.value);
 
         try {
+          if (!roomCodeInput.value || roomCodeInput.value === "")
+            throw new Error("Room code is empty.");
+
           const socket = await this.connectSocket();
 
           if (socket && socket.readyState == WebSocket.OPEN) {
             const lobbyScene = this.scenes["lobby"];
             lobbyScene.attach(socket);
 
+            // submit room code here
+
             this.load(false);
             this.switchScene("lobby");
           }
         } catch (err) {
-          joinButton.setProperty("text", "Join Game");
-          alert("Failed to connect to websocket server. Try again later.");
+          submitJoinButton.setProperty("text", "Submit");
+          alert(err);
         } finally {
           this.load(false);
         }
       },
     });
+    const clearInputButton = new Button({
+      text: "Clear",
+      onClick: () => {
+        roomCodeInput.clear();
+      },
+    });
 
     joinDialogActions.addChild(submitJoinButton);
+    joinDialogActions.addChild(clearInputButton);
     joinDialogActions.addChild(cancelJoinButton);
 
     joinDialog.addChild(roomCodeInput);

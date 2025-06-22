@@ -13,7 +13,7 @@ export class Container extends Interface {
   }
 
   computeChildrenLayout(ctx, parentX, parentY) {
-    // Start offset at padding
+    // start offset at padding
     const isRow = this.flexDirection === "row";
     let offset = isRow ? this.padding.x : this.padding.y;
 
@@ -36,7 +36,7 @@ export class Container extends Interface {
       offset += (isRow ? child.drawWidth : child.drawHeight) + this.gap;
     });
 
-    // Auto-size container if unset
+    // auto-size container if unset
     if (this.width == null) {
       if (isRow) this.drawWidth = offset - this.gap + this.padding.x;
       else

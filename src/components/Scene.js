@@ -3,10 +3,46 @@ import { GameObject } from "../GameObject.js";
 export class Scene extends GameObject {
   constructor() {
     super({});
+
+    this.focusedElement = null;
+  }
+
+  setFocus(delta, root, element) {
+    this.focusedElement?.onBlur?.(delta, root);
+    this.focusedElement = element;
+    this.focusedElement?.onFocus?.(delta, root);
+  }
+
+  clearFocus(delta, root, element) {
+    this.focusedElement?.onBlur?.(delta, root);
+    this.focusedElement = null;
+  }
+
+  collectInterfaces() {
+    const result = [];
+
+    // todo: logic
+    const collectSorted = (gameObject) => {
+      if (!gameObject.children || gameObject.children.length == 0) return;
+
+      const sorted = [...gameObject.children].sort(
+        (a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0)
+      );
+
+      for (const child of sorted) {
+        if (typeof child.containsPoint !== "function") continue;
+
+        result.push(child);
+        collectSorted(child);
+      }
+    };
+
+    collectSorted(this);
+    return result.reverse();
   }
 
   stepEntry(delta, root) {
-    super.stepEntry();
+    super.stepEntry(delta, root);
 
     const { input } = root;
 
@@ -38,6 +74,7 @@ export class Scene extends GameObject {
         obj.onHover?.(delta, root);
 
         if (wasClicked && isTarget) {
+          this.setFocus(delta, root, obj);
           obj.onClick?.(delta, root);
           input?.resetClick();
         }
@@ -46,28 +83,13 @@ export class Scene extends GameObject {
         obj.onHoverEnd?.(delta, root);
       }
     }
-  }
 
-  collectInterfaces() {
-    const result = [];
-
-    // todo: logic
-    const collectSorted = (gameObject) => {
-      if (!gameObject.children || gameObject.children.length == 0) return;
-
-      const sorted = [...gameObject.children].sort(
-        (a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0)
-      );
-
-      for (const child of sorted) {
-        if (typeof child.containsPoint !== "function") continue;
-
-        result.push(child);
-        collectSorted(child);
-      }
-    };
-
-    collectSorted(this);
-    return result.reverse();
+    if (
+      wasClicked &&
+      this.focusedElement &&
+      !this.focusedElement.containsPoint(clickX, clickY)
+    ) {
+      this.clearFocus(delta, root); // clicked outside current focus
+    }
   }
 }

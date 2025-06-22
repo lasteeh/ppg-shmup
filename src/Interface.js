@@ -55,17 +55,25 @@ export class Interface extends GameObject {
     );
   }
 
-  onClick() {
+  onClick(delta, root) {
     //
   }
 
-  onHover() {
+  onHover(delta, root) {
     //
   }
-  onHoverStart() {
+  onHoverStart(delta, root) {
     //
   }
-  onHoverEnd() {
+  onHoverEnd(delta, root) {
+    //
+  }
+
+  onFocus(delta, root) {
+    //
+  }
+
+  onBlur(delta, root) {
     //
   }
 

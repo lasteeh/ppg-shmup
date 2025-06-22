@@ -4,6 +4,7 @@ export class Input {
     this.canvas = canvas;
 
     this.keys = {};
+    this.pressedKey = null;
     this.mouse = {
       x: 0,
       y: 0,
@@ -15,6 +16,7 @@ export class Input {
 
     window.addEventListener("keydown", (e) => {
       this.keys[e.key] = true;
+      this.pressedKey = e.key;
     });
     window.addEventListener("keyup", (e) => {
       this.keys[e.key] = false;
@@ -52,6 +54,14 @@ export class Input {
     this.mouse.wasClicked = false;
     this.mouse.clickX = null;
     this.mouse.clickY = null;
+  }
+
+  resetPressedKey() {
+    this.pressedKey = null;
+  }
+
+  resetKeys() {
+    this.keys = {};
   }
 
   getPos = (e) => {
