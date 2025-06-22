@@ -1,7 +1,7 @@
 import { GameObject } from "./GameObject.js";
 import { Vector2 } from "./Vector2.js";
 
-export class Interactable extends GameObject {
+export class Interface extends GameObject {
   constructor({
     position,
     zIndex,
@@ -33,6 +33,21 @@ export class Interactable extends GameObject {
     this.padding = padding;
 
     this._lastFont = null; // for caching font
+  }
+
+  containsPoint(x, y) {
+    const absX = (this.parent?.position.x ?? 0) + this.position.x;
+    const absY = (this.parent?.position.y ?? 0) + this.position.y;
+    return (
+      x >= absX &&
+      x <= absX + this.drawWidth &&
+      y >= absY &&
+      y <= absY + this.drawHeight
+    );
+  }
+
+  onClick() {
+    //
   }
 
   computeTextMetrics(ctx, x, y) {

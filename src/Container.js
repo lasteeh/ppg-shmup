@@ -1,5 +1,6 @@
-import { Interactable } from "./Interactable.js";
-export class Container extends Interactable {
+import { Interface } from "./Interface.js";
+
+export class Container extends Interface {
   constructor({
     flexDirection = "row", // "row" or "column"
     gap = 0, // px between children

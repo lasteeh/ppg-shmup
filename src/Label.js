@@ -1,6 +1,6 @@
-import { Interactable } from "./Interactable.js";
+import { Interface } from "./Interface.js";
 
-export class Label extends Interactable {
+export class Label extends Interface {
   constructor({ ...options }) {
     super({ ...options });
   }
