@@ -12,6 +12,7 @@ export class Interface extends GameObject {
     fontSize = 14,
     fontFamily = "sans-serif",
     backgroundColor = "transparent",
+    hoverBackgroundColor = null,
     width = null,
     height = null,
     padding = new Vector2(0, 0),
@@ -25,12 +26,14 @@ export class Interface extends GameObject {
     this.fontSize = fontSize;
     this.fontFamily = fontFamily;
     this.backgroundColor = backgroundColor;
+    this.hoverBackgroundColor = hoverBackgroundColor ?? this.backgroundColor;
     this.textColor = textColor;
     this.textAlign = textAlign;
     this.verticalAlign = verticalAlign;
     this.width = width;
     this.height = height;
     this.padding = padding;
+    this.isHovering = false;
 
     this._lastFont = null; // for caching font
   }
@@ -47,6 +50,16 @@ export class Interface extends GameObject {
   }
 
   onClick() {
+    //
+  }
+
+  onHover() {
+    //
+  }
+  onHoverStart() {
+    //
+  }
+  onHoverEnd() {
     //
   }
 
@@ -105,7 +118,9 @@ export class Interface extends GameObject {
   }
 
   drawBackground(ctx, x, y) {
-    ctx.fillStyle = this.backgroundColor;
+    ctx.fillStyle = this.isHovering
+      ? this.hoverBackgroundColor
+      : this.backgroundColor;
     ctx.fillRect(Math.round(x), Math.round(y), this.drawWidth, this.drawHeight);
   }
 

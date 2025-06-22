@@ -13,17 +13,33 @@ export class Scene extends GameObject {
     const mouseX = input?.mouse.x;
     const mouseY = input?.mouse.y;
 
-    if (this.input?.wasClicked()) {
-      const interactiveObjects = this.collectInterfaces() ?? [];
+    const interactiveObjects = this.collectInterfaces() ?? [];
 
-      for (const obj of interactiveObjects) {
-        if (obj.containsPoint(mouseX, mouseY)) {
-          obj.onClick?.();
-          break;
-        }
+    for (const obj of interactiveObjects) {
+      const wasHovering = obj.isHovering ?? false;
+      const isHovering = obj.containsPoint(mouseX, mouseY);
+
+      if (wasHovering !== isHovering) {
+        obj._dirty = true;
       }
 
-      input?.resetClick();
+      obj.isHovering = isHovering;
+
+      if (isHovering) {
+        if (!wasHovering) {
+          obj.onHoverStart?.(delta, root);
+        }
+
+        obj.onHover?.(delta, root);
+
+        if (this.input?.wasClicked()) {
+          obj.onClick?.(delta, root);
+          input?.resetClick();
+        }
+        break;
+      } else if (wasHovering && !isHovering) {
+        obj.onHoverEnd?.(delta, root);
+      }
     }
   }
 
@@ -33,15 +49,15 @@ export class Scene extends GameObject {
     // todo: logic
     const collectSorted = (gameObject) => {
       if (!gameObject.children || gameObject.children.length == 0) return;
+
       const sorted = [...gameObject.children].sort(
         (a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0)
       );
 
       for (const child of sorted) {
-        if (typeof child.containsPoint === "function") {
-          result.push(child);
-        }
+        if (typeof child.containsPoint !== "function") continue;
 
+        result.push(child);
         collectSorted(child);
       }
     };
