@@ -6,10 +6,12 @@ export class TextInput extends Interface {
     placeholder = "Type here.",
     width = 250,
     height,
+    maxCharacters = 10,
     ...options
   }) {
     super({ text, width, height, ...options });
 
+    this.maxCharacters = maxCharacters;
     this.height = height ?? this.fontSize + this.padding.y * 2;
     this.placeholder = placeholder;
     this.value = text;
@@ -28,14 +30,30 @@ export class TextInput extends Interface {
       this.onBlur();
     }
 
-    if (focusedElement === this && input?.pressedKey) {
-      if (input?.pressedKey === "Backspace") {
-        this.text = this.text.slice(0, -1);
-        this.value = this.text;
-      } else if (/^[a-z0-9]$/i.test(input.pressedKey)) {
-        // only allow numbers and letters here
-        this.text += input.pressedKey;
-        this.value = this.text;
+    if (focusedElement === this) {
+      const pastedText = input?.getAndResetClipboardData?.();
+
+      if (input?.ctrlKey) {
+        if (pastedText) {
+          const cleanedText = pastedText.replace(/[^a-zA-Z0-9]/g, "");
+          const remainingCharacters = this.maxCharacters - this.text.length;
+          const textToAdd = cleanedText.substring(0, remainingCharacters);
+
+          this.text += textToAdd;
+          this.value = this.text;
+        }
+      } else if (input?.pressedKey) {
+        if (input?.pressedKey === "Backspace") {
+          this.text = this.text.slice(0, -1);
+          this.value = this.text;
+        } else if (
+          /^[a-z0-9]$/i.test(input.pressedKey) &&
+          this.text.length < this.maxCharacters
+        ) {
+          // only allow numbers and letters here
+          this.text += input.pressedKey;
+          this.value = this.text;
+        }
       }
     }
 

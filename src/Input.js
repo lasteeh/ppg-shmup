@@ -5,6 +5,8 @@ export class Input {
 
     this.keys = {};
     this.pressedKey = null;
+    this.ctrlKey = false;
+
     this.mouse = {
       x: 0,
       y: 0,
@@ -14,12 +16,23 @@ export class Input {
       clickY: null,
     };
 
+    this.clipboardData = null;
+
     window.addEventListener("keydown", (e) => {
       this.keys[e.key] = true;
       this.pressedKey = e.key;
+
+      this.ctrlKey = e.ctrlKey || e.metaKey;
     });
     window.addEventListener("keyup", (e) => {
       this.keys[e.key] = false;
+
+      this.ctrlKey = e.ctrlKey || e.metaKey;
+    });
+
+    window.addEventListener("paste", (e) => {
+      const pasted = (e.clipboardData || window.clipboardData).getData("text");
+      this.clipboardData = pasted;
     });
 
     canvas.addEventListener("mousemove", (e) => {
@@ -62,6 +75,12 @@ export class Input {
 
   resetKeys() {
     this.keys = {};
+  }
+
+  getAndResetClipboardData() {
+    const data = this.clipboardData;
+    this.clipboardData = null;
+    return data;
   }
 
   getPos = (e) => {
