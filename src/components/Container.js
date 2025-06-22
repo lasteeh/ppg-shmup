@@ -1,4 +1,4 @@
-import { Interface } from "./Interface.js";
+import { Interface } from "../Interface.js";
 
 export class Container extends Interface {
   constructor({

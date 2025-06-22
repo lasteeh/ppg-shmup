@@ -1,9 +1,10 @@
-import { Button } from "./Button.js";
+import { Button } from "./components/Button.js";
+import { Container } from "./components/Container.js";
 import { GameLoop } from "./GameLoop.js";
 import { Input } from "./Input.js";
-import { Label } from "./Label.js";
-import { Player } from "./Player.js";
-import { Scene } from "./Scene.js";
+import { Label } from "./components/Label.js";
+import { Player } from "./components/Player.js";
+import { Scene } from "./components/Scene.js";
 import { Vector2 } from "./Vector2.js";
 
 export class Game {
@@ -96,6 +97,9 @@ export class Game {
           this.load(false);
         }
       },
+    });
+    const joinDialog = new Container({
+      flexDirection: "column",
     });
 
     // add elements to main menu scene

@@ -1,5 +1,5 @@
-import { Interface } from "./Interface.js";
-import { Vector2 } from "./Vector2.js";
+import { Interface } from "../Interface.js";
+import { Vector2 } from "../Vector2.js";
 
 export class Button extends Interface {
   constructor({
