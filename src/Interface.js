@@ -34,13 +34,19 @@ export class Interface extends GameObject {
     this.height = height;
     this.padding = padding;
     this.isHovering = false;
-
-    this._lastFont = null; // for caching font
   }
 
   containsPoint(x, y) {
-    const absX = (this.parent?.position.x ?? 0) + this.position.x;
-    const absY = (this.parent?.position.y ?? 0) + this.position.y;
+    let absX = this.position.x;
+    let absY = this.position.y;
+    let p = this.parent;
+
+    while (p) {
+      absX += p.position.x;
+      absY += p.position.y;
+      p = p.parent;
+    }
+
     return (
       x >= absX &&
       x <= absX + this.drawWidth &&
@@ -67,10 +73,8 @@ export class Interface extends GameObject {
     const { fontSize, fontFamily, text, padding, width, height, textAlign } =
       this;
 
-    if (this._lastFont !== `${fontSize}px ${fontFamily}`) {
-      this._lastFont = `${fontSize}px ${fontFamily}`;
-      ctx.font = this._lastFont;
-    }
+    ctx.font = `${fontSize}px ${fontFamily}`;
+
     const textWidth = ctx.measureText(text).width;
     const textHeight = textWidth > 0 ? fontSize : 0;
 
@@ -125,24 +129,16 @@ export class Interface extends GameObject {
   }
 
   drawText(ctx) {
+    ctx.font = `${this.fontSize}px ${this.fontFamily}`;
     ctx.fillStyle = this.textColor;
     ctx.fillText(this.text, this.textPositionX, this.textPositionY);
   }
 
-  draw(ctx, x, y) {
-    let drawPosX = this.position.x;
-    let drawPosY = this.position.y;
+  draw(ctx, x = 0, y = 0) {
+    const drawPosX = this.position.x + x;
+    const drawPosY = this.position.y + y;
 
-    if (this.parent && this.parent.position) {
-      drawPosX = this.parent.position.x + this.position.x;
-      drawPosY = this.parent.position.y + this.position.y;
-    }
-
-    if (this._dirty) {
-      this.computeTextMetrics(ctx, drawPosX, drawPosY);
-      this._dirty = false;
-    }
-
+    this.computeTextMetrics(ctx, drawPosX, drawPosY);
     this.drawImage(ctx, drawPosX, drawPosY);
 
     this.children

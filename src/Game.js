@@ -6,6 +6,7 @@ import { Label } from "./components/Label.js";
 import { Player } from "./components/Player.js";
 import { Scene } from "./components/Scene.js";
 import { Vector2 } from "./Vector2.js";
+import { Dialog } from "./components/containers/Dialog.js";
 
 export class Game {
   constructor(canvas, virtualWidth, virtualHeight) {
@@ -74,6 +75,38 @@ export class Game {
       text: "Join Game",
       width: 120,
       position: new Vector2(20, 50),
+      onClick: () => {
+        if (joinDialog.hidden) {
+          joinDialog.show();
+        } else {
+          joinDialog.hide();
+        }
+      },
+    });
+    const joinDialog = new Dialog({
+      position: new Vector2(this.gameWidth / 3, this.gameHeight / 3),
+      backgroundColor: "white",
+      padding: new Vector2(10, 10),
+      flexDirection: "column",
+      gap: 10,
+    });
+    const roomCodeInput = new Label({
+      backgroundColor: "lightgray",
+      text: "Enter Room Code",
+      fontSize: 24,
+      padding: new Vector2(6, 6),
+    });
+    const joinDialogActions = new Container({
+      gap: 20,
+    });
+    const cancelJoinButton = new Button({
+      text: "Cancel",
+      onClick: () => {
+        joinDialog.hide();
+      },
+    });
+    const submitJoinButton = new Button({
+      text: "Submit",
       onClick: async () => {
         if (this.isLoading) return;
 
@@ -98,13 +131,17 @@ export class Game {
         }
       },
     });
-    const joinDialog = new Container({
-      flexDirection: "column",
-    });
+
+    joinDialogActions.addChild(submitJoinButton);
+    joinDialogActions.addChild(cancelJoinButton);
+
+    joinDialog.addChild(roomCodeInput);
+    joinDialog.addChild(joinDialogActions);
 
     // add elements to main menu scene
     mainMenuScene.addChild(hostButton);
     mainMenuScene.addChild(joinButton);
+    mainMenuScene.addChild(joinDialog);
 
     this.scenes["mainMenu"] = mainMenuScene;
 

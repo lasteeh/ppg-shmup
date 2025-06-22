@@ -21,7 +21,12 @@ export class Container extends Interface {
       // measure child at prospective pos
       const childX = parentX + (isRow ? offset : this.padding.x);
       const childY = parentY + (isRow ? this.padding.y : offset);
-      child.computeTextMetrics(ctx, childX, childY);
+
+      if (typeof child.computeChildrenLayout === "function") {
+        child.computeChildrenLayout(ctx, childX, childY);
+      } else {
+        child.computeTextMetrics(ctx, childX, childY);
+      }
 
       // set child relative position
       child.position.x = isRow ? offset : this.padding.x;
@@ -39,6 +44,7 @@ export class Container extends Interface {
           Math.max(...this.children.map((c) => c.drawWidth)) +
           this.padding.x * 2;
     }
+
     if (this.height == null) {
       if (!isRow) this.drawHeight = offset - this.gap + this.padding.y;
       else
@@ -48,17 +54,14 @@ export class Container extends Interface {
     }
   }
 
-  draw(ctx, x = 0, y = 0) {
-    const absX = (this.parent?.position.x ?? 0) + this.position.x + x;
-    const absY = (this.parent?.position.y ?? 0) + this.position.y + y;
+  draw(ctx, x, y) {
+    const absX = x + this.position.x;
+    const absY = y + this.position.y;
 
-    if (this._dirty) {
-      this.computeTextMetrics(ctx, absX, absY);
-      this._dirty = false;
-    }
-
+    this.computeTextMetrics(ctx, absX, absY);
     this.computeChildrenLayout(ctx, absX, absY);
     this.drawBackground(ctx, absX, absY);
+
     this.children.forEach((child) => child.draw(ctx, absX, absY));
   }
 }
