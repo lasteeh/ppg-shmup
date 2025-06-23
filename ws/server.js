@@ -1,6 +1,13 @@
 const os = require("os");
 const http = require("http");
 const WebSocket = require("ws");
+const RoomManager = require("./RoomManager");
+
+const originalLog = console.log;
+console.log = (...args) => {
+  const timestamp = new Date().toLocaleString();
+  originalLog(`[${timestamp}]`, ...args);
+};
 
 const PORT = 7979;
 const server = http.createServer((req, res) => {
@@ -20,6 +27,8 @@ server.on("upgrade", (req, socket, head) => {
   }
 });
 
+const roomManager = new RoomManager();
+
 websocketServer.on("connection", (websocket) => {
   console.log("A client connected.");
 
@@ -28,12 +37,26 @@ websocketServer.on("connection", (websocket) => {
 
     try {
       parsedMessage = JSON.parse(message);
-      console.log("\n");
-      console.log("Received: \n");
-      console.log(message);
+      console.log("Received:");
+      console.log(parsedMessage);
     } catch (err) {
       websocket.send("Error: Invalid JSON.");
       return;
+    }
+
+    switch (parsedMessage.type) {
+      case "join-room":
+        const result = roomManager.joinRoom(parsedMessage.code, websocket);
+        websocket.send(JSON.stringify(result));
+
+        console.log("Sent:");
+        console.log(result);
+        break;
+
+      default:
+        websocket.send(
+          JSON.stringify({ success: false, error: "Uknown command." })
+        );
     }
   });
 

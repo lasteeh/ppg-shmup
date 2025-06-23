@@ -52,7 +52,6 @@ export class Game {
         if (this.isLoading) return;
 
         this.load(true);
-        hostButton.setProperty("text", "Creating a lobby...");
 
         try {
           const socket = await this.connectSocket();
@@ -65,9 +64,7 @@ export class Game {
             this.switchScene("lobby");
           }
         } catch (err) {
-          hostButton.setProperty("text", "Host Game");
-          alert("Failed to connect to websocket server. Try again later.");
-        } finally {
+          alert(err);
           this.load(false);
         }
       },
@@ -112,12 +109,17 @@ export class Game {
         if (this.isLoading) return;
 
         this.load(true);
-        submitJoinButton.setProperty("text", "Joining lobby...");
 
         // console.log("submitting: ", roomCodeInput.value);
 
         try {
-          if (!roomCodeInput.value || roomCodeInput.value === "")
+          this.roomCode = roomCodeInput.value;
+          const message = JSON.stringify({
+            type: "join-room",
+            code: this.roomCode,
+          });
+
+          if (!this.roomCode || this.roomCode === "")
             throw new Error("Room code is empty.");
 
           const socket = await this.connectSocket();
@@ -127,14 +129,10 @@ export class Game {
             lobbyScene.attach(socket);
 
             // submit room code here
-
-            this.load(false);
-            this.switchScene("lobby");
+            socket.send(message);
           }
         } catch (err) {
-          submitJoinButton.setProperty("text", "Submit");
           alert(err);
-        } finally {
           this.load(false);
         }
       },
@@ -220,9 +218,12 @@ export class Game {
       };
 
       this.socket.onclose = () => {
-        console.log("Websocket closed.");
+        alert("Disconnected to server.");
         this.socket.removeEventListener("message", this.handleSocketMessage);
         this.socket = null;
+
+        this.switchScene("mainMenu");
+        if (this.isLoading) this.load(false);
       };
     });
   };
@@ -232,6 +233,15 @@ export class Game {
       const data = JSON.parse(event.data);
 
       switch (data.type) {
+        case "room-joined":
+          if (data.success) {
+            this.switchScene("lobby");
+          } else {
+            if (data.error) {
+              alert(data.error);
+            }
+          }
+          break;
         case "room-created":
           // check if code received
           break;
@@ -240,6 +250,10 @@ export class Game {
       }
     } catch (err) {
       console.error("Failed to handle message: ", err);
+    }
+
+    if (this.isLoading) {
+      this.load(false);
     }
   };
 
