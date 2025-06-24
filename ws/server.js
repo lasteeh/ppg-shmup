@@ -44,23 +44,38 @@ websocketServer.on("connection", (websocket) => {
       return;
     }
 
+    let result = { success: false, error: "Uknown command." };
+
     switch (parsedMessage.type) {
       case "join-room":
-        const result = roomManager.joinRoom(parsedMessage.code, websocket);
-        websocket.send(JSON.stringify(result));
-
-        console.log("Sent:");
-        console.log(result);
+        result = roomManager.joinRoom(parsedMessage.code, websocket);
         break;
 
-      default:
-        websocket.send(
-          JSON.stringify({ success: false, error: "Uknown command." })
-        );
+      case "create-room":
+        const roomCode = roomManager.createRoom();
+        console.log("Room created: ", roomCode);
+
+        const roomCreateMessage = {
+          type: "room-created",
+          success: true,
+          code: roomCode,
+        };
+
+        websocket.send(JSON.stringify(roomCreateMessage));
+        console.log("Sent:");
+        console.log(roomCreateMessage);
+
+        result = roomManager.joinRoom(roomCode, websocket, true);
+        break;
     }
+
+    websocket.send(JSON.stringify(result));
+    console.log("Sent:");
+    console.log(result);
   });
 
   websocket.on("close", () => {
+    roomManager.removePlayer(websocket);
     console.log("A client disconnected.");
   });
 });

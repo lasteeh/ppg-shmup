@@ -38,6 +38,7 @@ export class Game {
     this.isLoading = false;
 
     this.roomCode = null;
+    this.isHost = false;
   }
 
   init() {
@@ -53,6 +54,10 @@ export class Game {
 
         this.load(true);
 
+        const message = JSON.stringify({
+          type: "create-room",
+        });
+
         try {
           const socket = await this.connectSocket();
 
@@ -60,8 +65,8 @@ export class Game {
             const lobbyScene = this.scenes["lobby"];
             lobbyScene.attach(socket);
 
-            this.load(false);
-            this.switchScene("lobby");
+            // send create room request here
+            socket.send(message);
           }
         } catch (err) {
           alert(err);
@@ -172,7 +177,7 @@ export class Game {
     const lobbyScene = new Scene();
     lobbyScene.attach("input", this.input);
     const roomCode = new Label({
-      text: "Room Code: ",
+      text: `Room Code: ${this.roomCode}`,
       position: new Vector2(20, 20),
     });
     const goBackButton = new Button({
@@ -235,6 +240,14 @@ export class Game {
       switch (data.type) {
         case "room-joined":
           if (data.success) {
+            if (data.code) {
+              this.roomCode = data.code;
+            }
+
+            if (data.isHost) {
+              this.isHost = true;
+            }
+            console.log(this.roomCode, this.isHost);
             this.switchScene("lobby");
           } else {
             if (data.error) {
@@ -244,6 +257,10 @@ export class Game {
           break;
         case "room-created":
           // check if code received
+          if (data.code) {
+            this.roomCode = data.code;
+            console.log("Room created: ", data.code);
+          }
           break;
         default:
           console.warn("Unhandled message type: ", data.type);
