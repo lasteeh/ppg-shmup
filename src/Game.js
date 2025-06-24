@@ -26,42 +26,45 @@ export class Game {
     this.gameBounds = { width: this.gameWidth, height: this.gameHeight };
     this.input = new Input(this.canvas, dpr);
 
-    this.scenes = {};
     this.activeScene = null;
 
     this.socket = null;
     this.isLoading = false;
 
     this.roomCode = null;
+    this.playerId = null;
     this.isHost = false;
+
+    this.roomPlayers = [];
   }
 
   init() {
-    // initiate main menu scene
-    const mainMenuScene = new MainMenu(this);
-    this.registerScene("mainMenu", mainMenuScene);
-
-    // initiate gameplay scene
-    const gameScene = new GameScene(this);
-    this.registerScene("game", gameScene);
-
-    const lobbyScene = new Lobby(this);
-    this.registerScene("lobby", lobbyScene);
-
     this.switchScene("mainMenu");
   }
 
-  registerScene(name, scene) {
-    this.scenes[name] = scene;
-  }
-
-  getScene(name) {
-    return this.scenes[name];
-  }
-
   switchScene = (name) => {
-    if (!this.scenes[name]) throw new Error("Scene not found.");
-    this.activeScene = this.scenes[name];
+    this.activeScene?.destroy();
+
+    let scene;
+
+    switch (name) {
+      case "mainMenu":
+        scene = new MainMenu(this);
+        break;
+
+      case "game":
+        scene = new GameScene(this);
+        break;
+
+      case "lobby":
+        scene = new Lobby(this);
+        break;
+
+      default:
+        throw new Error("Scene not found.");
+    }
+
+    this.activeScene = scene;
     this.activeScene.init();
   };
 
@@ -107,10 +110,14 @@ export class Game {
               this.roomCode = data.code;
             }
 
+            if (data.playerId) {
+              this.playerId = data.playerId;
+            }
+
             if (data.isHost) {
               this.isHost = true;
             }
-            console.log(this.roomCode, this.isHost);
+
             this.switchScene("lobby");
           } else {
             if (data.error) {
@@ -123,6 +130,12 @@ export class Game {
           if (data.code) {
             this.roomCode = data.code;
             console.log("Room created: ", data.code);
+          }
+          break;
+
+        case "room-update":
+          if (data.players) {
+            this.roomPlayers = data.players;
           }
           break;
         default:

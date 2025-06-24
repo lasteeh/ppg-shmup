@@ -43,9 +43,6 @@ export class MainMenu extends Scene {
           const socket = await game.connectSocket();
 
           if (socket && socket.readyState == WebSocket.OPEN) {
-            const lobbyScene = game.getScene("lobby");
-            lobbyScene.attach(socket);
-
             // send create room request here
             socket.send(message);
           }
@@ -124,9 +121,6 @@ export class MainMenu extends Scene {
           const socket = await game.connectSocket();
 
           if (socket && socket.readyState == WebSocket.OPEN) {
-            const lobbyScene = game.getScene("lobby");
-            lobbyScene.attach(socket);
-
             // submit room code here
             socket.send(message);
           }

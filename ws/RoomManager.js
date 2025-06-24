@@ -18,11 +18,17 @@ class RoomManager {
       return { type: "room-joined", success: false, error: "Room not found." };
     if (room.players.length >= this.MAX_PLAYERS)
       return { type: "room-joined", success: false, error: "Room full." };
+    if (room.isRunning)
+      return {
+        type: "room-joined",
+        success: false,
+        error: "Game already started.",
+      };
 
     const playerNumber = room.players.length + 1;
     const player = {
       id: crypto.randomUUID(),
-      name: `Player ${playerNumber}`,
+      name: `P${playerNumber}`,
       isHost: isHost,
       socket,
     };
@@ -31,8 +37,15 @@ class RoomManager {
     this.socketToRoom.set(socket, code);
 
     // todo: broadcast player count updates here
+    this.broadcastPlayerUpdates(code);
 
-    return { type: "room-joined", success: true, code: code, isHost: isHost };
+    return {
+      type: "room-joined",
+      success: true,
+      code: code,
+      playerId: player.id,
+      isHost: isHost,
+    };
   }
 
   createRoom() {
@@ -42,7 +55,7 @@ class RoomManager {
       code = this.generateRoomCode();
     } while (this.rooms.has(code));
 
-    this.rooms.set(code, { players: [] });
+    this.rooms.set(code, { players: [], isRunning: false });
 
     return code;
   }
@@ -83,6 +96,25 @@ class RoomManager {
         console.log(`Room ${roomCode} deleted. No players left.`);
       }
     }
+  }
+
+  broadcastPlayerUpdates(code) {
+    const room = this.rooms.get(code);
+    if (!room) return;
+
+    const playersWithoutSockets = room.players.map((player) => {
+      const { socket, ...playersWithoutSocket } = player;
+      return playersWithoutSocket;
+    });
+
+    for (const player of room.players) {
+      player.socket?.send(
+        JSON.stringify({ type: "room-update", players: playersWithoutSockets })
+      );
+    }
+
+    console.log("Sent:");
+    console.log(`Room ${code} players: `, playersWithoutSockets);
   }
 }
 
