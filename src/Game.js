@@ -1,13 +1,8 @@
-import { Button } from "./components/Button.js";
-import { Container } from "./components/Container.js";
 import { GameLoop } from "./GameLoop.js";
 import { Input } from "./Input.js";
-import { Label } from "./components/Label.js";
-import { Player } from "./components/Player.js";
-import { Scene } from "./components/Scene.js";
-import { Vector2 } from "./Vector2.js";
-import { Dialog } from "./components/containers/Dialog.js";
-import { TextInput } from "./components/TextInput.js";
+import { MainMenu } from "./game/scenes/MainMenu.js";
+import { GameScene } from "./game/scenes/GameScene.js";
+import { Lobby } from "./game/scenes/Lobby.js";
 
 export class Game {
   constructor(canvas, virtualWidth, virtualHeight) {
@@ -43,163 +38,31 @@ export class Game {
 
   init() {
     // initiate main menu scene
-    const mainMenuScene = new Scene();
-    mainMenuScene.attach("input", this.input);
-    const hostButton = new Button({
-      text: "Host Game",
-      width: 120,
-      position: new Vector2(20, 20),
-      onClick: async () => {
-        if (this.isLoading) return;
-
-        this.load(true);
-
-        const message = JSON.stringify({
-          type: "create-room",
-        });
-
-        try {
-          const socket = await this.connectSocket();
-
-          if (socket && socket.readyState == WebSocket.OPEN) {
-            const lobbyScene = this.scenes["lobby"];
-            lobbyScene.attach(socket);
-
-            // send create room request here
-            socket.send(message);
-          }
-        } catch (err) {
-          alert(err);
-          this.load(false);
-        }
-      },
-    });
-    const joinButton = new Button({
-      text: "Join Game",
-      width: 120,
-      position: new Vector2(20, 50),
-      onClick: () => {
-        if (joinDialog.hidden) {
-          joinDialog.show();
-        } else {
-          joinDialog.hide();
-        }
-      },
-    });
-    const joinDialog = new Dialog({
-      position: new Vector2(this.gameWidth / 3, this.gameHeight / 3),
-      backgroundColor: "white",
-      padding: new Vector2(10, 10),
-      flexDirection: "column",
-      gap: 10,
-    });
-    const roomCodeInput = new TextInput({
-      backgroundColor: "lightgray",
-      placeholder: "Enter Room Code",
-      fontSize: 24,
-      padding: new Vector2(6, 6),
-    });
-    const joinDialogActions = new Container({
-      gap: 20,
-    });
-    const cancelJoinButton = new Button({
-      text: "Cancel",
-      onClick: () => {
-        joinDialog.hide();
-      },
-    });
-    const submitJoinButton = new Button({
-      text: "Submit",
-      onClick: async () => {
-        if (this.isLoading) return;
-
-        this.load(true);
-
-        // console.log("submitting: ", roomCodeInput.value);
-
-        try {
-          this.roomCode = roomCodeInput.value;
-          const message = JSON.stringify({
-            type: "join-room",
-            code: this.roomCode,
-          });
-
-          if (!this.roomCode || this.roomCode === "")
-            throw new Error("Room code is empty.");
-
-          const socket = await this.connectSocket();
-
-          if (socket && socket.readyState == WebSocket.OPEN) {
-            const lobbyScene = this.scenes["lobby"];
-            lobbyScene.attach(socket);
-
-            // submit room code here
-            socket.send(message);
-          }
-        } catch (err) {
-          alert(err);
-          this.load(false);
-        }
-      },
-    });
-    const clearInputButton = new Button({
-      text: "Clear",
-      onClick: () => {
-        roomCodeInput.clear();
-      },
-    });
-
-    joinDialogActions.addChild(submitJoinButton);
-    joinDialogActions.addChild(clearInputButton);
-    joinDialogActions.addChild(cancelJoinButton);
-
-    joinDialog.addChild(roomCodeInput);
-    joinDialog.addChild(joinDialogActions);
-
-    // add elements to main menu scene
-    mainMenuScene.addChild(hostButton);
-    mainMenuScene.addChild(joinButton);
-    mainMenuScene.addChild(joinDialog);
-
-    this.scenes["mainMenu"] = mainMenuScene;
+    const mainMenuScene = new MainMenu(this);
+    this.registerScene("mainMenu", mainMenuScene);
 
     // initiate gameplay scene
-    const gameScene = new Scene();
-    gameScene.attach("bounds", this.gameBounds);
-    gameScene.attach("input", this.input);
-    const player = new Player({});
+    const gameScene = new GameScene(this);
+    this.registerScene("game", gameScene);
 
-    // add elements to gamescene
-    gameScene.addChild(player);
-
-    this.scenes["game"] = gameScene;
-
-    const lobbyScene = new Scene();
-    lobbyScene.attach("input", this.input);
-    const roomCode = new Label({
-      text: `Room Code: ${this.roomCode}`,
-      position: new Vector2(20, 20),
-    });
-    const goBackButton = new Button({
-      text: "Go Back",
-      position: new Vector2(20, this.gameHeight - 40),
-      onClick: () => {
-        this.socket.close();
-        this.switchScene("mainMenu");
-      },
-    });
-
-    lobbyScene.addChild(roomCode);
-    lobbyScene.addChild(goBackButton);
-
-    this.scenes["lobby"] = lobbyScene;
+    const lobbyScene = new Lobby(this);
+    this.registerScene("lobby", lobbyScene);
 
     this.switchScene("mainMenu");
+  }
+
+  registerScene(name, scene) {
+    this.scenes[name] = scene;
+  }
+
+  getScene(name) {
+    return this.scenes[name];
   }
 
   switchScene = (name) => {
     if (!this.scenes[name]) throw new Error("Scene not found.");
     this.activeScene = this.scenes[name];
+    this.activeScene.init();
   };
 
   connectSocket = () => {
