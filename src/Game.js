@@ -160,8 +160,40 @@ export class Game {
           }
           break;
 
+        case "player-moved":
+          if (this.activeScene?.players && data.id && data.position) {
+            const updatedPlayer = this.activeScene.players.find(
+              (p) => p.id === data.id
+            );
+            if (updatedPlayer && !updatedPlayer.isSelf) {
+              updatedPlayer.position = data.position;
+            }
+          }
+          break;
+
+        case "player-left":
+          if (data.id) {
+            this.roomPlayers = this.roomPlayers.filter((p) => p.id !== data.id);
+
+            if (this.activeScene?.players) {
+              const activeScene = this.activeScene;
+              const leavingPlayer = activeScene.players.find(
+                (p) => p.id === data.id
+              );
+
+              if (leavingPlayer) {
+                leavingPlayer.destroy();
+              }
+
+              activeScene.players = activeScene.players.filter(
+                (p) => p.id !== data.id
+              );
+            }
+          }
+          break;
+
         default:
-          console.warn("Unhandled message type: ", data.type);
+          console.warn("Unhandled message type: ", data);
       }
     } catch (err) {
       console.error("Failed to handle message: ", err);

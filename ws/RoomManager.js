@@ -72,6 +72,7 @@ class RoomManager {
     if (!room) return;
 
     const leavingPlayer = room.players.find((p) => p.socket === socket);
+    if (!leavingPlayer) return;
 
     console.log(`Player left room ${roomCode}: `, {
       id: leavingPlayer.id,
@@ -91,6 +92,10 @@ class RoomManager {
     } else {
       room.players = room.players.filter((p) => p.socket !== socket);
       this.socketToRoom.delete(socket);
+
+      if (room.isRunning) {
+        this.broadcastPlayerLeft(room, leavingPlayer);
+      }
 
       if (room.players.length === 0) {
         this.rooms.delete(roomCode);
@@ -153,6 +158,8 @@ class RoomManager {
     console.log("Sent: ");
     console.log(payload);
     console.log("Game started: " + roomCode);
+
+    return null;
   }
 
   broadcastRoomUpdates(code) {
@@ -183,6 +190,60 @@ class RoomManager {
     }
 
     return positions;
+  }
+
+  updatePlayerPosition(socket, position) {
+    const roomCode = this.socketToRoom.get(socket);
+    if (!roomCode) return;
+
+    const room = this.rooms.get(roomCode);
+    if (!room) return;
+
+    const player = room.players.find((p) => p.socket === socket);
+    if (!player) return;
+
+    player.position = position;
+    console.log("Player position updated: ", player.position);
+  }
+
+  broadcastPlayerPosition(socket, id, position) {
+    const roomCode = this.socketToRoom.get(socket);
+    if (!roomCode) return;
+
+    const room = this.rooms.get(roomCode);
+    if (!room) return;
+
+    const message = JSON.stringify({
+      type: "player-moved",
+      id,
+      position,
+    });
+
+    for (const p of room.players) {
+      if (p.socket !== socket) {
+        p.socket.send(message);
+      }
+    }
+
+    console.log("Sent: ");
+    console.log(JSON.parse(message));
+  }
+
+  broadcastPlayerLeft(room, leavingPlayer) {
+    const playerId = leavingPlayer.id;
+    if (!playerId) return;
+
+    const message = JSON.stringify({
+      type: "player-left",
+      id: playerId,
+    });
+
+    for (const player of room.players) {
+      player.socket.send(message);
+    }
+
+    console.log("Sent: ");
+    console.log(JSON.parse(message));
   }
 }
 

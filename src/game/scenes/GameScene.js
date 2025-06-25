@@ -19,14 +19,14 @@ export class GameScene extends Scene {
 
     for (const playerData of game.roomPlayers) {
       const isSelf = playerData.id === game.playerId;
-      console.log(playerData);
+
       const player = new Player({
         id: playerData.id,
         name: playerData.name,
         position: playerData.spawnPoint,
         isSelf: isSelf,
       });
-      console.log(playerData.spawnPoint);
+
       this.players.push(player);
       this.addChild(player);
 

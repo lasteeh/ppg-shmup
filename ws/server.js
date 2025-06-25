@@ -71,6 +71,17 @@ websocketServer.on("connection", (websocket) => {
       case "start-game":
         result = roomManager.startGame(websocket);
         break;
+
+      case "move-player":
+        result = null;
+
+        roomManager.updatePlayerPosition(websocket, parsedMessage.position);
+        roomManager.broadcastPlayerPosition(
+          websocket,
+          parsedMessage.id,
+          parsedMessage.position
+        );
+        break;
     }
 
     if (!result) return;

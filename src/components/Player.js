@@ -1,7 +1,7 @@
 import { GameObject } from "../GameObject.js";
 
 export class Player extends GameObject {
-  constructor({ id, name, position, isSelf }) {
+  constructor({ id, name, position, isSelf = false }) {
     super({ position });
 
     this.id = id;
@@ -18,9 +18,14 @@ export class Player extends GameObject {
     // animations
     this.elapsedTime = 0;
     this.animationInterval = 500; // 1 second in ms
+
+    // limit socket exchange
+    this._lastPosition = null;
   }
 
   step(delta, root) {
+    const { game } = root;
+
     this.elapsedTime += delta;
 
     if (this.elapsedTime > this.animationInterval) {
@@ -41,6 +46,22 @@ export class Player extends GameObject {
       0,
       Math.min(this.position.y, bounds.height - this.frameSize)
     );
+
+    const moved =
+      this.position.x !== this._lastPosition?.x &&
+      this.position.y !== this._lastPosition?.y;
+
+    if (moved && this.isSelf && game?.socket?.readyState === WebSocket.OPEN) {
+      const payload = {
+        type: "move-player",
+        id: this.id,
+        position: { x: this.position.x, y: this.position.y },
+      };
+
+      game?.socket?.send(JSON.stringify(payload));
+    }
+
+    this._lastPosition = { x: this.position.x, y: this.position.y };
   }
 
   move(delta, root) {
