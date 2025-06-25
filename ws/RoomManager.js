@@ -37,7 +37,7 @@ class RoomManager {
     this.socketToRoom.set(socket, code);
 
     // todo: broadcast player count updates here
-    this.broadcastPlayerUpdates(code);
+    this.broadcastRoomUpdates(code);
 
     return {
       type: "room-joined",
@@ -96,7 +96,7 @@ class RoomManager {
         this.rooms.delete(roomCode);
         console.log(`Room ${roomCode} deleted. No players left.`);
       } else {
-        this.broadcastPlayerUpdates(roomCode);
+        this.broadcastRoomUpdates(roomCode);
       }
     }
   }
@@ -128,18 +128,34 @@ class RoomManager {
 
     room.isRunning = true;
 
-    const message = JSON.stringify({ type: "game-started", success: true });
+    const positions = this.generateSpawnPoints(room.players.length);
+
+    room.players.forEach((p, index) => {
+      p.spawnPoint = positions[index];
+    });
+
+    const payload = {
+      type: "game-started",
+      success: true,
+      players: room.players.map((p) => ({
+        id: p.id,
+        name: p.name,
+        spawnPoint: p.spawnPoint,
+      })),
+    };
+
+    const json = JSON.stringify(payload);
 
     for (const p of room.players) {
-      p.socket.send(message);
+      p.socket.send(json);
     }
 
     console.log("Sent: ");
-    console.log(message);
+    console.log(payload);
     console.log("Game started: " + roomCode);
   }
 
-  broadcastPlayerUpdates(code) {
+  broadcastRoomUpdates(code) {
     const room = this.rooms.get(code);
     if (!room) return;
 
@@ -156,6 +172,17 @@ class RoomManager {
 
     console.log("Sent:");
     console.log(`Room ${code} players: `, playersWithoutSockets);
+  }
+
+  generateSpawnPoints(playerCount) {
+    const positions = [];
+    const spacing = 50;
+
+    for (let i = 0; i < playerCount; i++) {
+      positions.push({ x: (i % 3) * spacing, y: Math.floor(i / 3) * spacing });
+    }
+
+    return positions;
   }
 }
 

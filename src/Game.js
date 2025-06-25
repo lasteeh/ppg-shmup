@@ -42,6 +42,13 @@ export class Game {
     this.switchScene("mainMenu");
   }
 
+  reset() {
+    this.roomCode = null;
+    this.playerId = null;
+    this.isHost = false;
+    this.roomPlayers = [];
+  }
+
   switchScene = (name) => {
     this.activeScene?.destroy();
 
@@ -141,6 +148,10 @@ export class Game {
 
         case "game-started":
           if (data.success) {
+            if (data.players) {
+              this.roomPlayers = data.players;
+            }
+
             this.switchScene("game");
           } else {
             if (data.error) {

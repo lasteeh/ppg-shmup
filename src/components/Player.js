@@ -1,12 +1,19 @@
 import { GameObject } from "../GameObject.js";
 
 export class Player extends GameObject {
-  constructor({ position }) {
+  constructor({ id, name, position, isSelf }) {
     super({ position });
+
+    this.id = id;
+    this.name = name;
+    this.isSelf = isSelf;
 
     this.frameSize = 16;
     this.speed = 6;
-    this.color = "blue";
+
+    this.baseColor = isSelf ? "blue" : "red";
+    this.altColor = isSelf ? "darkblue" : "darkred";
+    this.color = this.baseColor;
 
     // animations
     this.elapsedTime = 0;
@@ -17,7 +24,8 @@ export class Player extends GameObject {
     this.elapsedTime += delta;
 
     if (this.elapsedTime > this.animationInterval) {
-      this.color = this.color === "blue" ? "darkblue" : "blue";
+      this.color =
+        this.color === this.baseColor ? this.altColor : this.baseColor;
       this.elapsedTime = 0;
     }
 
@@ -36,6 +44,8 @@ export class Player extends GameObject {
   }
 
   move(delta, root) {
+    if (!this.isSelf) return;
+
     const { input } = root;
 
     let dx = 0;

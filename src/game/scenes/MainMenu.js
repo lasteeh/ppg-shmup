@@ -26,6 +26,9 @@ export class MainMenu extends Scene {
   init() {
     const game = this.game;
 
+    // reset some game properties here
+    game.reset();
+
     this.hostButton = new Button({
       text: "Host Game",
       width: 120,

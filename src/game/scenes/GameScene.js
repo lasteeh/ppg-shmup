@@ -10,13 +10,27 @@ export class GameScene extends Scene {
     this.attach("bounds", game.gameBounds);
     this.attach("input", game.input);
 
+    this.players = [];
     this.player = null;
   }
 
   init() {
     const game = this.game;
 
-    this.player = new Player({});
-    this.addChild(this.player);
+    for (const playerData of game.roomPlayers) {
+      const isSelf = playerData.id === game.playerId;
+      console.log(playerData);
+      const player = new Player({
+        id: playerData.id,
+        name: playerData.name,
+        position: playerData.spawnPoint,
+        isSelf: isSelf,
+      });
+      console.log(playerData.spawnPoint);
+      this.players.push(player);
+      this.addChild(player);
+
+      if (isSelf) this.player = player;
+    }
   }
 }
