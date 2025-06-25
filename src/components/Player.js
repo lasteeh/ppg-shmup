@@ -19,6 +19,8 @@ export class Player extends GameObject {
     this.elapsedTime = 0;
     this.animationInterval = 500; // 1 second in ms
 
+    this.targetPosition = { ...position };
+
     // limit socket exchange
     this._lastPosition = null;
   }
@@ -36,6 +38,12 @@ export class Player extends GameObject {
 
     this.move(delta, root);
 
+    if (!this.isSelf) {
+      const lerpFactor = 0.1;
+      this.position.x += (this.targetPosition.x - this.position.x) * lerpFactor;
+      this.position.y += (this.targetPosition.y - this.position.y) * lerpFactor;
+    }
+
     // prevent player from going off screen
     const bounds = root.bounds;
     this.position.x = Math.max(
@@ -48,7 +56,7 @@ export class Player extends GameObject {
     );
 
     const moved =
-      this.position.x !== this._lastPosition?.x &&
+      this.position.x !== this._lastPosition?.x ||
       this.position.y !== this._lastPosition?.y;
 
     if (moved && this.isSelf && game?.socket?.readyState === WebSocket.OPEN) {

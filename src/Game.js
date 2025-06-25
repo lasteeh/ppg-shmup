@@ -34,7 +34,6 @@ export class Game {
     this.roomCode = null;
     this.playerId = null;
     this.isHost = false;
-
     this.roomPlayers = [];
   }
 
@@ -166,7 +165,7 @@ export class Game {
               (p) => p.id === data.id
             );
             if (updatedPlayer && !updatedPlayer.isSelf) {
-              updatedPlayer.position = data.position;
+              updatedPlayer.targetPosition = data.position;
             }
           }
           break;
