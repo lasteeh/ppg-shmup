@@ -138,6 +138,17 @@ export class Game {
             this.roomPlayers = data.players;
           }
           break;
+
+        case "game-started":
+          if (data.success) {
+            this.switchScene("game");
+          } else {
+            if (data.error) {
+              alert(data.error);
+            }
+          }
+          break;
+
         default:
           console.warn("Unhandled message type: ", data.type);
       }

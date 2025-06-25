@@ -84,6 +84,7 @@ class RoomManager {
         this.socketToRoom.delete(player.socket);
 
         // todo: broadcast delete room update here
+        player.socket.close();
       });
       this.rooms.delete(roomCode);
       console.log(`Room ${roomCode} deleted. Host left.`);
@@ -94,8 +95,48 @@ class RoomManager {
       if (room.players.length === 0) {
         this.rooms.delete(roomCode);
         console.log(`Room ${roomCode} deleted. No players left.`);
+      } else {
+        this.broadcastPlayerUpdates(roomCode);
       }
     }
+  }
+
+  startGame(socket) {
+    const roomCode = this.socketToRoom.get(socket);
+    if (!roomCode)
+      return {
+        type: "game-started",
+        success: false,
+        error: "Client is not in a room",
+      };
+
+    const room = this.rooms.get(roomCode);
+    if (!room)
+      return {
+        type: "game-started",
+        success: false,
+        error: "Room does not exist.",
+      };
+
+    const player = room.players.find((p) => p.socket === socket);
+    if (!player || !player.isHost)
+      return {
+        type: "game-started",
+        success: false,
+        error: "Client is not the host.",
+      };
+
+    room.isRunning = true;
+
+    const message = JSON.stringify({ type: "game-started", success: true });
+
+    for (const p of room.players) {
+      p.socket.send(message);
+    }
+
+    console.log("Sent: ");
+    console.log(message);
+    console.log("Game started: " + roomCode);
   }
 
   broadcastPlayerUpdates(code) {

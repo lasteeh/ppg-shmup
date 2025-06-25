@@ -20,6 +20,7 @@ export class Lobby extends Scene {
 
     this.playersBox = null;
 
+    this.lastPlayerIds = [];
     this.currentPlayers = [];
   }
 
@@ -48,8 +49,23 @@ export class Lobby extends Scene {
     this.startButton = new Button({
       text: "Start Game",
       position: new Vector2(20, game.gameHeight - 70),
-      onClick: () => {
-        console.log("starting");
+      onClick: async () => {
+        if (game.isLoading) return;
+
+        game.load(true);
+
+        try {
+          const message = JSON.stringify({ type: "start-game" });
+          const socket = await game.connectSocket();
+
+          if (socket && socket.readyState == WebSocket.OPEN) {
+            // submit room code here
+            socket.send(message);
+          }
+        } catch (err) {
+          alert(err);
+          game.load(false);
+        }
       },
     });
 
@@ -71,23 +87,34 @@ export class Lobby extends Scene {
 
   step(delta, root) {
     const game = this.game;
+    const newPlayerIds = game.roomPlayers.map((p) => p.id);
 
-    // console.log(game.roomPlayers);
-    for (const player of this.currentPlayers) {
-      this.playersBox.removeChild(player);
-    }
-    this.currentPlayers = game.roomPlayers;
+    // compare arrays by converting to string
+    const playersChanged =
+      JSON.stringify(newPlayerIds) !== JSON.stringify(this.lastPlayerIds);
 
-    for (const player of this.currentPlayers) {
-      const info = new Label({
-        text: player.name,
-        fontSize: 20,
-        backgroundColor: "yellow",
-        padding: new Vector2(10, 10),
-      });
+    if (playersChanged) {
+      // Update cache
+      this.lastPlayerIds = newPlayerIds;
 
-      this.currentPlayers.push(info);
-      this.playersBox.addChild(info);
+      // remove old UI labels
+      for (const playerLabel of this.currentPlayers) {
+        this.playersBox.removeChild(playerLabel);
+      }
+
+      this.currentPlayers = [];
+
+      for (const player of game.roomPlayers) {
+        const info = new Label({
+          text: player.name,
+          fontSize: 20,
+          backgroundColor: "yellow",
+          padding: new Vector2(10, 10),
+        });
+
+        this.playersBox.addChild(info);
+        this.currentPlayers.push(info);
+      }
     }
   }
 }

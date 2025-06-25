@@ -67,8 +67,13 @@ websocketServer.on("connection", (websocket) => {
 
         result = roomManager.joinRoom(roomCode, websocket, true);
         break;
+
+      case "start-game":
+        result = roomManager.startGame(websocket);
+        break;
     }
 
+    if (!result) return;
     websocket.send(JSON.stringify(result));
     console.log("Sent:");
     console.log(result);
