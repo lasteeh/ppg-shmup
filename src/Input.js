@@ -35,6 +35,11 @@ export class Input {
       this.clipboardData = pasted;
     });
 
+    window.addEventListener("blur", (e) => {
+      this.resetKeys();
+      this.resetPressedKey();
+    });
+
     canvas.addEventListener("mousemove", (e) => {
       const pos = this.getPos(e);
       this.mouse.x = pos.x;

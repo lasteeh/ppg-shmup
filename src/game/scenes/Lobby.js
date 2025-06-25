@@ -31,9 +31,14 @@ export class Lobby extends Scene {
       text: `Room Code: ${game.roomCode ?? ""}`,
       position: new Vector2(20, 20),
       fontSize: 20,
-      onClick: () => {
+      onClick: async () => {
         if (!game.roomCode) return;
-        copyTextToClipboard(game.roomCode);
+
+        try {
+          await copyTextToClipboard(game.roomCode);
+        } catch (err) {
+          console.error("Failed to copy room code: ", err);
+        }
       },
     });
 
