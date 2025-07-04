@@ -1,5 +1,7 @@
+import { Button } from "../../components/Button.js";
 import { Player } from "../../components/Player.js";
 import { Scene } from "../../components/Scene.js";
+import { Vector2 } from "../../Vector2.js";
 
 export class GameScene extends Scene {
   constructor(game) {
@@ -12,10 +14,21 @@ export class GameScene extends Scene {
 
     this.players = [];
     this.player = null;
+
+    this.leaveGameButton = null;
   }
 
   init() {
     const game = this.game;
+
+    this.leaveGameButton = new Button({
+      text: "Leave Game",
+      position: new Vector2(game.gameWidth - 100, 20),
+      onClick: async () => {
+        game.socket?.close();
+        game.switchScene("mainMenu");
+      },
+    });
 
     for (const playerData of game.roomPlayers) {
       const isSelf = playerData.id === game.playerId;
@@ -31,6 +44,8 @@ export class GameScene extends Scene {
       this.addChild(player);
 
       if (isSelf) this.player = player;
+
+      this.addChild(this.leaveGameButton);
     }
   }
 }
