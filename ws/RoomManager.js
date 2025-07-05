@@ -30,6 +30,7 @@ class RoomManager {
       id: crypto.randomUUID(),
       name: `P${playerNumber}`,
       isHost: isHost,
+      isFiring: false,
       socket,
     };
 
@@ -203,7 +204,7 @@ class RoomManager {
     if (!player) return;
 
     player.position = position;
-    console.log("Player position updated: ", player.position);
+    console.log("Player position updated: ", player.id, player.position);
   }
 
   broadcastPlayerPosition(socket, id, position) {
@@ -217,6 +218,43 @@ class RoomManager {
       type: "player-moved",
       id,
       position,
+    });
+
+    for (const p of room.players) {
+      if (p.socket !== socket) {
+        p.socket.send(message);
+      }
+    }
+
+    console.log("Sent: ");
+    console.log(JSON.parse(message));
+  }
+
+  updatePlayerFiring(socket, isFiring) {
+    const roomCode = this.socketToRoom.get(socket);
+    if (!roomCode) return;
+
+    const room = this.rooms.get(roomCode);
+    if (!room) return;
+
+    const player = room.players.find((p) => p.socket === socket);
+    if (!player) return;
+
+    player.isFiring = isFiring;
+    console.log("Player firing state updated: ", player.id, player.isFiring);
+  }
+
+  broadcastPlayerFiring(socket, id, isFiring) {
+    const roomCode = this.socketToRoom.get(socket);
+    if (!roomCode) return;
+
+    const room = this.rooms.get(roomCode);
+    if (!room) return;
+
+    const message = JSON.stringify({
+      type: "player-fired",
+      id,
+      isFiring,
     });
 
     for (const p of room.players) {

@@ -30,9 +30,7 @@ export class Scene extends GameObject {
       );
 
       for (const child of sorted) {
-        if (typeof child.containsPoint !== "function") continue;
-
-        result.push(child);
+        if (typeof child.containsPoint === "function") result.push(child);
         collectSorted(child);
       }
     };

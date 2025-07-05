@@ -82,6 +82,16 @@ websocketServer.on("connection", (websocket) => {
           parsedMessage.position
         );
         break;
+
+      case "fire-player":
+        result = null;
+        roomManager.updatePlayerFiring(websocket, parsedMessage.isFiring);
+        roomManager.broadcastPlayerFiring(
+          websocket,
+          parsedMessage.id,
+          parsedMessage.isFiring
+        );
+        break;
     }
 
     if (!result) return;

@@ -191,6 +191,20 @@ export class Game {
           }
           break;
 
+        case "player-fired":
+          if (this.activeScene?.players && data.id) {
+            const firingPlayer = this.activeScene.players.find(
+              (p) => p.id === data.id
+            );
+
+            if (data.isFiring) {
+              firingPlayer.startFire();
+            } else {
+              firingPlayer.stopFire();
+            }
+          }
+          break;
+
         default:
           console.warn("Unhandled message type: ", data);
       }

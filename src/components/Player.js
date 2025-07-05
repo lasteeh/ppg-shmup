@@ -1,4 +1,5 @@
 import { GameObject } from "../GameObject.js";
+import { Laser } from "./Laser.js";
 
 export class Player extends GameObject {
   constructor({ id, name, position, isSelf = false }) {
@@ -15,6 +16,8 @@ export class Player extends GameObject {
     this.altColor = isSelf ? "darkblue" : "darkred";
     this.color = this.baseColor;
 
+    this.laser = null;
+
     // animations
     this.elapsedTime = 0;
     this.animationInterval = 500; // 1 second in ms
@@ -26,7 +29,7 @@ export class Player extends GameObject {
   }
 
   step(delta, root) {
-    const { game } = root;
+    const { game, input } = root;
 
     this.elapsedTime += delta;
 
@@ -37,6 +40,7 @@ export class Player extends GameObject {
     }
 
     this.move(delta, root);
+    this.fire(delta, root);
 
     if (!this.isSelf) {
       const lerpFactor = 0.1;
@@ -55,6 +59,7 @@ export class Player extends GameObject {
       Math.min(this.position.y, bounds.height - this.frameSize)
     );
 
+    // announce movement positions to server
     const moved =
       this.position.x !== this._lastPosition?.x ||
       this.position.y !== this._lastPosition?.y;
@@ -94,6 +99,57 @@ export class Player extends GameObject {
     const speed = this.speed || 1;
     this.position.x += dx * speed;
     this.position.y += dy * speed;
+  }
+
+  fire(delta, root) {
+    if (!this.isSelf) return;
+
+    const { game, input } = root;
+    const socket = game?.socket;
+
+    const isFiring = input?.keys[" "] || input?.isMouseDown();
+
+    if (isFiring) {
+      this.startFire(socket);
+    } else {
+      this.stopFire(socket);
+    }
+  }
+
+  startFire(socket = null) {
+    if (this.laser) return;
+
+    this.laser = new Laser(this);
+    this.addChild(this.laser);
+
+    if (!socket) return;
+
+    // broadcast here
+    this.sendFiringState(true, socket);
+  }
+
+  stopFire(socket = null) {
+    if (!this.laser) return;
+
+    this.laser.destroy();
+    this.laser = null;
+
+    if (!socket) return;
+
+    // broadcast here
+    this.sendFiringState(false, socket);
+  }
+
+  sendFiringState(isFiring, socket) {
+    if (!socket || socket?.readyState !== WebSocket.OPEN) return;
+
+    const payload = {
+      type: "fire-player",
+      id: this.id,
+      isFiring,
+    };
+
+    socket.send(JSON.stringify(payload));
   }
 
   drawImage(ctx, x, y) {
